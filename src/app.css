@@ -1,0 +1,8 @@
+* { margin: 0; box-sizing: border-box; }
+body { min-height: 100vh; }
+#app { min-height: inherit; display: flex; flex-direction: column; }
+.game-wrapper { 
+  background-color: palegoldenrod;
+  &.detatched { display: grid; place-items: center; }
+}
+.game-canvas { display: block; background: #fff; }
