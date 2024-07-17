@@ -6,3 +6,13 @@ body { min-height: 100vh; }
   &.detatched { display: grid; place-items: center; }
 }
 .game-canvas { display: block; background: #fff; }
+
+.action-propagate { background-color: hotpink;
+  &:hover { border-color: hotpink; }
+}
+.action-field-define-random { background-color: #FFC107;
+  &:hover { border-color: #FFC107; }
+}
+.action-field-clear { border-color: grey;
+  &:hover { border-color: inherit; background-color: lightgrey; }
+}

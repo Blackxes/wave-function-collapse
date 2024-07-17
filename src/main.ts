@@ -280,6 +280,21 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector(".action-propagate")?.addEventListener("click", () => {
     Game.propagate();
   });
+  document
+    .querySelector(".action-field-define-random")
+    ?.addEventListener("click", () => {
+      const point = new Point(
+        getRandomFloored(WorldConfig.tilesCount.x),
+        getRandomFloored(WorldConfig.tilesCount.y)
+      );
+
+      Game.createEntity(point);
+    });
+  document
+    .querySelector(".action-field-clear")
+    ?.addEventListener("click", () => {
+      Game.clearEntities();
+    });
 
   // Scrolling
   Renderer.canvas.addEventListener("wheel", (evt) => {
