@@ -32,3 +32,19 @@ export function getNeighbours(
 
   return Object.values(neighbours).filter((v: IPoint | null) => v) as IPoint[];
 }
+
+/**
+ * Generates a random number inside the thresholds
+ * @param max Upper threshold (Exclusive)
+ * @param min Lower threshold (Inclusive)
+ */
+export const getRandom = (max: number, min: number = 0) =>
+  Math.random() * (max - min) + min;
+
+/**
+ * Generates a floored random number inside the thresholds
+ * @param max Upper threshold (Exclusive)
+ * @param min Lower threshold (Inclusive)
+ */
+export const getRandomFloored = (max: number, min: number = 0) =>
+  Math.floor(getRandom(max, min));

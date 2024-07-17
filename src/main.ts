@@ -5,7 +5,7 @@ import {
   TileTypes,
   WorldConfig,
 } from "./data";
-import { getNeighbours } from "./functions";
+import { getNeighbours, getRandomFloored } from "./functions";
 import {
   IWorldObject as IEntity,
   IGlobalGameObject,
@@ -20,9 +20,9 @@ const Game: IGlobalGameObject = {
     return Renderer.initialize();
   },
   entities: [],
-  createTile: (coords, type) => {
+  createEntity: (coords, type) => {
     if (Game.getEntity(coords)) {
-      console.log("Tile already defined");
+      console.log("Entity already defined");
       return false;
     }
 
@@ -39,7 +39,7 @@ const Game: IGlobalGameObject = {
 
     Game.entities.push(entity);
   },
-  removeTile: (coords) => {
+  deleteEntity: (coords) => {
     const index = Game.entities.findIndex((v) =>
       PointFunctions.compare(v.coords, coords)
     );
@@ -47,6 +47,11 @@ const Game: IGlobalGameObject = {
   },
   getEntity: (coords) => {
     return Game.entities.find((v) => PointFunctions.compare(coords, v.coords));
+  },
+  clearEntities: () => {
+    for (const entity of Game.entities) {
+      Game.deleteEntity(entity.coords);
+    }
   },
   lastUpdate: null,
   updateTimer: 0,
@@ -114,9 +119,11 @@ const Game: IGlobalGameObject = {
 
         // Remove neighbours to attempt different types and complete the area
         if (!filteredContraints.length) {
-          subNeighbours.forEach((v) => Game.removeTile(v));
+          subNeighbours.forEach((v) => Game.deleteEntity(v));
           continue;
         }
+
+        // debugger;
 
         // Pick a random contraint present in all existing neighbours
         const randomIndex = Math.floor(
@@ -267,9 +274,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // debugger;
 
     if (evt.buttons == 1) {
-      Game.createTile(localPoint);
+      Game.createEntity(localPoint);
     } else if (evt.buttons == 2) {
-      Game.removeTile(localPoint);
+      Game.deleteEntity(localPoint);
     }
   };
 

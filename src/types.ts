@@ -10,9 +10,10 @@ export interface IGlobalGameObject {
   initialized: boolean;
   initialize: () => boolean;
   entities: IWorldObject[];
-  createTile: (position: IPoint, type?: TileType) => void;
-  removeTile: (position: IPoint) => void;
+  createEntity: (position: IPoint, type?: TileType) => void;
+  deleteEntity: (position: IPoint) => void;
   getEntity: (coords: IPoint) => IWorldObject | undefined;
+  clearEntities: () => void;
   lastUpdate: null | number;
   updateTimer: number;
   updateTimerThreshold: number;
