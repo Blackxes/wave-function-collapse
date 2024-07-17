@@ -3,7 +3,7 @@
  * @Email blackxes.dev@gmail.com
  */
 
-import { IRenderModel, IWorld, TileType } from "./types";
+import { IRenderModel, IWorld, TileType, TileTypeContrain } from "./types";
 import { Point } from "./utils";
 
 export const BaseRenderModel: IRenderModel = {
@@ -21,8 +21,52 @@ export const WorldConfig: IWorld = {
 export const TileTypes = ["grass", "forest", "water", "sand"] as const;
 
 export const FieldContraints = {
-  grass: ["grass", "forest", "sand"],
-  forest: ["forest", "grass"],
-  sand: ["sand", "water", "grass"],
-  water: ["water", "sand"],
-} satisfies Record<TileType, TileType[]>;
+  grass: [
+    {
+      type: "grass",
+      probability: 1,
+    },
+    {
+      type: "forest",
+      probability: 1,
+    },
+    {
+      type: "sand",
+      probability: 1,
+    },
+  ],
+  forest: [
+    {
+      type: "forest",
+      probability: 1,
+    },
+    {
+      type: "grass",
+      probability: 1,
+    },
+  ],
+  sand: [
+    {
+      type: "sand",
+      probability: 1,
+    },
+    {
+      type: "water",
+      probability: 1,
+    },
+    {
+      type: "grass",
+      probability: 1,
+    },
+  ],
+  water: [
+    {
+      type: "water",
+      probability: 1,
+    },
+    {
+      type: "sand",
+      probability: 1,
+    },
+  ],
+} satisfies Record<TileType, TileTypeContrain[]>;

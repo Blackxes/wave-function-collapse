@@ -49,6 +49,11 @@ export interface IRenderModel {
 
 export type TileType = (typeof TileTypes)[number];
 
+export interface TileTypeContrain {
+  type: TileType;
+  probability: number;
+}
+
 export interface TileNeighbours {
   top: IPoint | null;
   right: IPoint | null;

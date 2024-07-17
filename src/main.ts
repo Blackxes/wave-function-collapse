@@ -10,7 +10,7 @@ import {
   IWorldObject as IEntity,
   IGlobalGameObject,
   IGlobalRendererObject,
-  TileType,
+  TileTypeContrain,
 } from "./types";
 import { IPoint, Point, PointFunctions } from "./utils";
 
@@ -90,7 +90,7 @@ const Game: IGlobalGameObject = {
 
         // Loop through sub neighbours and collect field type contraints
         const subNeighbours = getNeighbours(neighbour, true);
-        const rawContraints: Array<TileType[]> = [];
+        const rawContraints: Array<TileTypeContrain[]> = [];
 
         for (const subNeighbour of subNeighbours) {
           const e = Game.getEntity(subNeighbour);
@@ -107,7 +107,8 @@ const Game: IGlobalGameObject = {
         const filteredContraints = rawContraints
           .flat()
           .filter(
-            (t, _, a) => a.filter((v) => v == t).length == rawContraints.length
+            (t, _, a) =>
+              a.filter((v) => v.type == t.type).length == rawContraints.length
           )
           .filter((v, i, a) => a.indexOf(v) == i);
 
@@ -122,7 +123,7 @@ const Game: IGlobalGameObject = {
           Math.random() * filteredContraints.length
         );
 
-        Game.createTile(neighbour, filteredContraints[randomIndex]);
+        Game.createEntity(neighbour, filteredContraints[randomIndex].type);
 
         // Add to processed neighbours
         processed.push(neighbour);
