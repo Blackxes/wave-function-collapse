@@ -5,7 +5,7 @@ import {
   TileTypes,
   WorldConfig,
 } from "./data";
-import { getNeighbours, getRandomFloored } from "./functions";
+import { getNeighbours, getNormalized, getRandomFloored } from "./functions";
 import {
   IWorldObject as IEntity,
   IGlobalGameObject,
@@ -20,6 +20,7 @@ const Game: IGlobalGameObject = {
     return Renderer.initialize();
   },
   entities: [],
+  processed: [],
   createEntity: (coords, type) => {
     if (Game.getEntity(coords)) {
       console.log("Entity already defined");
@@ -48,9 +49,14 @@ const Game: IGlobalGameObject = {
   getEntity: (coords) => {
     return Game.entities.find((v) => PointFunctions.compare(coords, v.coords));
   },
+  isProcessed: (coords) => {
+    return (
+      Game.processed.find((v) => PointFunctions.compare(v, coords)) != undefined
+    );
+  },
   clearEntities: () => {
-    for (const entity of Game.entities) {
-      Game.deleteEntity(entity.coords);
+    for (const entity of { ...Game.entities }) {
+      console.log("Delete", Game.deleteEntity(entity.coords));
     }
   },
   lastUpdate: null,
@@ -79,17 +85,25 @@ const Game: IGlobalGameObject = {
     /** Array of x_y to avoid duplicates */
     const processed: IPoint[] = [];
 
-    for (const tile of [...Game.entities]) {
-      console.group("Tile", tile.coords);
-      console.log("TileDetails", tile);
+    for (const entity of [...Game.entities]) {
+      console.group("Tile", entity.coords);
+      console.log("TileDetails", entity);
+
+      if (Game.isProcessed(entity.coords)) {
+        console.log("Shitty performant");
+        console.groupEnd();
+        continue;
+      }
 
       // Get entities neighbours
-      const neighbours = getNeighbours(tile.coords, true);
+      const neighbours = getNeighbours(entity.coords, true);
 
       // Loop through neighbours and get their neighbours
       for (const neighbour of neighbours) {
+        console.group("Neighbour: ", neighbour);
         // Check if that neighbour has already been processed
         if (processed.find((v) => PointFunctions.compare(v, neighbour))) {
+          console.groupEnd();
           continue;
         }
 
@@ -107,8 +121,10 @@ const Game: IGlobalGameObject = {
           rawContraints.push(FieldContraints[e.type]);
         }
 
+        // debugger;
+
         // Filter out invalid contraints
-        // Count the number of times the contraint is present and filter out the ones less than neighbour count
+        // Count the number of times the contrer out the ones less than neighbour count
         const filteredContraints = rawContraints
           .flat()
           .filter(
@@ -117,24 +133,42 @@ const Game: IGlobalGameObject = {
           )
           .filter((v, i, a) => a.indexOf(v) == i);
 
+        // debugger;
+
         // Remove neighbours to attempt different types and complete the area
         if (!filteredContraints.length) {
+          console.log("No contraints available delete neighbours");
           subNeighbours.forEach((v) => Game.deleteEntity(v));
           continue;
         }
 
+        // Pick a random contraint from probability normalized contraints
+        const normalized = Object.values(
+          getNormalized(filteredContraints, "probability")
+        ).sort((a, b) => b.normalizedValue - a.normalizedValue);
+
         // debugger;
 
-        // Pick a random contraint present in all existing neighbours
-        const randomIndex = Math.floor(
-          Math.random() * filteredContraints.length
+        let randomNumber = Math.random();
+        let threshold = 0;
+        // Commulate probabilities until the randomNumber is lower which selects the tile type
+        const selectedContraint = normalized.find(
+          (v) => (threshold += v.normalizedValue) && threshold > randomNumber
         );
 
-        Game.createEntity(neighbour, filteredContraints[randomIndex].type);
+        console.log("SelectedContraint: ", selectedContraint);
+        console.log("RandomNumber: ", randomNumber);
+        console.log("Threshold: ", threshold);
+
+        Game.createEntity(neighbour, selectedContraint?.type);
 
         // Add to processed neighbours
         processed.push(neighbour);
+
+        console.groupEnd();
       }
+
+      Game.processed.push(entity.coords);
 
       console.groupEnd();
     }

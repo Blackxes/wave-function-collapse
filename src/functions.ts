@@ -48,3 +48,11 @@ export const getRandom = (max: number, min: number = 0) =>
  */
 export const getRandomFloored = (max: number, min: number = 0) =>
   Math.floor(getRandom(max, min));
+
+export function getNormalized<
+  O extends { [K: string]: any },
+  K extends keyof O
+>(array: O[], key: K): Array<O & { normalizedValue: number }> {
+  const total = array.reduce((s, v) => (s += v[key]), 0);
+  return array.map((v) => ({ ...v, normalizedValue: v[key] / total }));
+}
