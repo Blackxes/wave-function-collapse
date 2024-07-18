@@ -29,7 +29,6 @@ const Game: IGlobalGameObject = {
       console.log("Entity already defined");
       return false;
     }
-    console.log(coords, Game.getEntity(coords), Game.entities);
 
     const entity: IEntity = {
       coords,
@@ -58,7 +57,7 @@ const Game: IGlobalGameObject = {
   },
   clearEntities: () => {
     for (const entity of { ...Game.entities }) {
-      console.log("Delete", Game.deleteEntity(entity.coords));
+      Game.deleteEntity(entity.coords);
     }
   },
   lastUpdate: null,
@@ -97,11 +96,7 @@ const Game: IGlobalGameObject = {
     const processed: IPoint[] = [];
 
     for (const entity of [...Game.entities]) {
-      console.group("Tile", entity.coords);
-      console.log("TileDetails", entity);
       if (Game.isProcessed(entity.coords)) {
-        console.log("Shitty performant");
-        console.groupEnd();
         continue;
       }
 
@@ -110,10 +105,8 @@ const Game: IGlobalGameObject = {
 
       // Loop through neighbours and get their neighbours
       for (const neighbour of neighbours) {
-        console.group("Neighbour: ", neighbour);
         // Check if that neighbour has already been processed
         if (processed.find((v) => PointFunctions.compare(v, neighbour))) {
-          console.groupEnd();
           continue;
         }
 
@@ -147,7 +140,6 @@ const Game: IGlobalGameObject = {
 
         // Remove neighbours to attempt different types and complete the area
         if (!filteredContraints.length) {
-          console.log("No contraints available delete neighbours");
           subNeighbours.forEach((v) => Game.deleteEntity(v));
           continue;
         }
@@ -165,23 +157,19 @@ const Game: IGlobalGameObject = {
         const selectedContraint = normalized.find(
           (v) => (threshold += v.normalizedValue) && threshold > randomNumber
         );
-        console.log("SelectedContraint: ", selectedContraint);
-        console.log("RandomNumber: ", randomNumber);
-        console.log("Threshold: ", threshold);
 
         Game.createEntity(neighbour, selectedContraint?.type);
 
         // Add to processed neighbours
         processed.push(neighbour);
-        console.groupEnd();
       }
 
       Game.processed.push(entity.coords);
     }
-      console.groupEnd();
+
     return Game.processed.length != Game.entities.length;
   },
-    console.log("Propagating");
+  autoPropagationEnabled: false,
   autoPropagate: (_) => {
     if (!Game.autoPropagationEnabled) {
       return;
