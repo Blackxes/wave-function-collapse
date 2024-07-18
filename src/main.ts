@@ -42,10 +42,19 @@ const Game: IGlobalGameObject = {
     Game.entities.push(entity);
   },
   deleteEntity: (coords) => {
-    const index = Game.entities.findIndex((v) =>
+    const entityIndex = Game.entities.findIndex((v) =>
       PointFunctions.compare(v.coords, coords)
     );
-    return index != -1 && Game.entities.splice(index, 1);
+    const processedIndex = Game.processed.findIndex((v) =>
+      PointFunctions.compare(v, coords)
+    );
+
+    return (
+      entityIndex != -1 &&
+      Game.entities.splice(entityIndex, 1) &&
+      processedIndex != -1 &&
+      Game.processed.splice(processedIndex, 1)
+    );
   },
   getEntity: (coords) => {
     return Game.entities.find((v) => PointFunctions.compare(coords, v.coords));
@@ -56,7 +65,7 @@ const Game: IGlobalGameObject = {
     );
   },
   clearEntities: () => {
-    for (const entity of { ...Game.entities }) {
+    for (const entity of [...Game.entities]) {
       Game.deleteEntity(entity.coords);
     }
   },
