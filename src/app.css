@@ -10,6 +10,9 @@ body { min-height: 100vh; }
 .action-propagate { background-color: hotpink;
   &:hover { border-color: hotpink; }
 }
+.action-propagate-auto { background-color: #b51a67; color: white;
+  &:hover { border-color: #b51a67; }
+}
 .action-field-define-random { background-color: #FFC107;
   &:hover { border-color: #FFC107; }
 }
