@@ -22,6 +22,7 @@ export interface IGlobalGameObject {
   fpsCounter: number;
   fpsTimer: number;
   lastFps: number;
+  updateCallbacks: Array<(delta: number) => void>;
   run: () => void;
   propagate: () => void;
 }

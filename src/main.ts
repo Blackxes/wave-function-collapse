@@ -17,10 +17,13 @@ import { IPoint, Point, PointFunctions } from "./utils";
 const Game: IGlobalGameObject = {
   initialized: false,
   initialize: () => {
+    Game.updateCallbacks.push(Game.autoPropagate);
+
     return Renderer.initialize();
   },
   entities: [],
   processed: [],
+  updateCallbacks: [],
   createEntity: (coords, type) => {
     if (Game.getEntity(coords)) {
       console.log("Entity already defined");
@@ -61,25 +64,34 @@ const Game: IGlobalGameObject = {
   },
   lastUpdate: null,
   updateTimer: 0,
-  updateTimerThreshold: 1 / 1,
+  updateTimerThreshold: 1 / 10,
   fpsCounter: 0,
   fpsTimer: 0,
   lastFps: 0,
   run: function () {
-    const delta = performance.now() - (this.lastUpdate ?? performance.now());
-    this.lastUpdate = this.lastUpdate ?? performance.now();
-    this.fpsTimer += delta;
-    this.fpsCounter++;
+    const delta =
+      (performance.now() - (Game.lastUpdate ?? performance.now())) / 1000;
+    Game.lastUpdate = performance.now();
+    Game.updateTimer += delta;
+    Game.fpsTimer += delta;
+    Game.fpsCounter++;
 
-    if (this.fpsTimer > 1000 / 4) {
-      this.lastFps = this.fpsCounter * 4;
-      this.fpsTimer -= 1000 / 4;
-      this.fpsCounter = 0;
+    // FPS rendering
+    if (Game.fpsTimer > 1 / 8) {
+      Game.lastFps = Game.fpsCounter * 8;
+      Game.fpsTimer -= 1 / 8;
+      Game.fpsCounter = 0;
+    }
+
+    // Game update
+    if (Game.updateTimer > Game.updateTimerThreshold) {
+      Game.updateTimer -= Game.updateTimerThreshold;
+      Game.updateCallbacks.forEach((c) => c(delta));
     }
 
     Renderer.render(delta);
 
-    window.requestAnimationFrame(Game.run.bind(Game));
+    window.requestAnimationFrame(Game.run);
   },
   propagate: () => {
     /** Array of x_y to avoid duplicates */
