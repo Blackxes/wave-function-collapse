@@ -29,7 +29,6 @@ const Game: IGlobalGameObject = {
       console.log("Entity already defined");
       return false;
     }
-
     console.log(coords, Game.getEntity(coords), Game.entities);
 
     const entity: IEntity = {
@@ -100,7 +99,6 @@ const Game: IGlobalGameObject = {
     for (const entity of [...Game.entities]) {
       console.group("Tile", entity.coords);
       console.log("TileDetails", entity);
-
       if (Game.isProcessed(entity.coords)) {
         console.log("Shitty performant");
         console.groupEnd();
@@ -167,7 +165,6 @@ const Game: IGlobalGameObject = {
         const selectedContraint = normalized.find(
           (v) => (threshold += v.normalizedValue) && threshold > randomNumber
         );
-
         console.log("SelectedContraint: ", selectedContraint);
         console.log("RandomNumber: ", randomNumber);
         console.log("Threshold: ", threshold);
@@ -176,17 +173,30 @@ const Game: IGlobalGameObject = {
 
         // Add to processed neighbours
         processed.push(neighbour);
-
         console.groupEnd();
       }
 
       Game.processed.push(entity.coords);
-
+    }
       console.groupEnd();
+    return Game.processed.length != Game.entities.length;
+  },
+    console.log("Propagating");
+  autoPropagate: (_) => {
+    if (!Game.autoPropagationEnabled) {
+      return;
     }
 
-    console.log("Propagating");
+    if (!Game.propagate()) {
+      Game.stopAutoPropagation();
+    }
   },
+  startAutoPropagation: () =>
+    !void console.log("Auto propagation started") &&
+    (Game.autoPropagationEnabled = true),
+  stopAutoPropagation: () =>
+    !void console.log("Auto propagation stopped") &&
+    (Game.autoPropagationEnabled = false),
 };
 
 const Renderer: IGlobalRendererObject = {
@@ -334,6 +344,13 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector(".action-propagate")?.addEventListener("click", () => {
     Game.propagate();
   });
+
+  document
+    .querySelector(".action-propagate-auto")
+    ?.addEventListener("click", () => {
+      Game.startAutoPropagation();
+    });
+
   document
     .querySelector(".action-field-define-random")
     ?.addEventListener("click", () => {
