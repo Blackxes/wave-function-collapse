@@ -7,13 +7,13 @@ import { IRenderModel, IWorld, TileType, TileTypeContrain } from "./types";
 import { Point } from "./utils";
 
 export const BaseRenderModel: IRenderModel = {
-  size: new Point(10, 10),
+  size: new Point(50, 50),
   imagePath: "./images/tower.webp",
   backgroundColor: "#ff8000",
 };
 
 export const WorldConfig: IWorld = {
-  tilesCount: { x: 50, y: 50 },
+  tilesCount: { x: 10, y: 10 },
   size: { x: 500, y: 500 },
   zoom: 1,
 };
@@ -24,17 +24,21 @@ export const FieldContraints = {
   grass: [
     {
       type: "grass",
-      probability: 2,
+      probability: 10,
     },
     {
       type: "forest",
-      probability: 0.5,
+      probability: 1,
+    },
+    {
+      type: "sand",
+      probability: 0.25,
     },
   ],
   forest: [
     {
       type: "forest",
-      probability: 1,
+      probability: 2,
     },
     {
       type: "grass",
@@ -43,18 +47,26 @@ export const FieldContraints = {
   ],
   sand: [
     {
+      type: "sand",
+      probability: 5,
+    },
+    {
       type: "grass",
+      probability: 0.25,
+    },
+    {
+      type: "water",
       probability: 1,
     },
   ],
   water: [
     {
       type: "water",
-      probability: 3,
+      probability: 5,
     },
     {
       type: "sand",
-      probability: 1,
+      probability: 0.25,
     },
   ],
 } satisfies Record<TileType, TileTypeContrain[]>;
