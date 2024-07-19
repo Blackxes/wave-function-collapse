@@ -22,8 +22,14 @@ export interface IGlobalGameObject {
   fpsCounter: number;
   fpsTimer: number;
   lastFps: number;
+  updateCallbacks: Array<(delta: number) => void>;
   run: () => void;
-  propagate: () => void;
+  propagate: () => boolean;
+  autoPropagationEnabled: boolean;
+  autoPropagate: (delta: number) => void;
+  startAutoPropagation: () => void;
+  stopAutoPropagation: () => void;
+  currentPaintingTileType: null | TileType;
 }
 
 export interface IGlobalRendererObject {
@@ -51,6 +57,12 @@ export interface IRenderModel {
 }
 
 export type TileType = (typeof TileTypes)[number];
+
+export interface TileTypeConfig {
+  type: TileType;
+  backgroundColor: string;
+  frontgroundColor: string;
+}
 
 export interface TileTypeContrain {
   type: TileType;

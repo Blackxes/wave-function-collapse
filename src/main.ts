@@ -2,6 +2,7 @@ import "./app.css";
 import {
   BaseRenderModel,
   FieldContraints,
+  TileTypeConfigs,
   TileTypes,
   WorldConfig,
 } from "./data";
@@ -17,17 +18,18 @@ import { IPoint, Point, PointFunctions } from "./utils";
 const Game: IGlobalGameObject = {
   initialized: false,
   initialize: () => {
+    Game.updateCallbacks.push(Game.autoPropagate);
+
     return Renderer.initialize();
   },
   entities: [],
   processed: [],
+  updateCallbacks: [],
   createEntity: (coords, type) => {
     if (Game.getEntity(coords)) {
       console.log("Entity already defined");
       return false;
     }
-
-    console.log(coords, Game.getEntity(coords), Game.entities);
 
     const entity: IEntity = {
       coords,
@@ -41,10 +43,19 @@ const Game: IGlobalGameObject = {
     Game.entities.push(entity);
   },
   deleteEntity: (coords) => {
-    const index = Game.entities.findIndex((v) =>
+    const entityIndex = Game.entities.findIndex((v) =>
       PointFunctions.compare(v.coords, coords)
     );
-    return index != -1 && Game.entities.splice(index, 1);
+    const processedIndex = Game.processed.findIndex((v) =>
+      PointFunctions.compare(v, coords)
+    );
+
+    return (
+      entityIndex != -1 &&
+      Game.entities.splice(entityIndex, 1) &&
+      processedIndex != -1 &&
+      Game.processed.splice(processedIndex, 1)
+    );
   },
   getEntity: (coords) => {
     return Game.entities.find((v) => PointFunctions.compare(coords, v.coords));
@@ -55,43 +66,47 @@ const Game: IGlobalGameObject = {
     );
   },
   clearEntities: () => {
-    for (const entity of { ...Game.entities }) {
-      console.log("Delete", Game.deleteEntity(entity.coords));
+    for (const entity of [...Game.entities]) {
+      Game.deleteEntity(entity.coords);
     }
   },
   lastUpdate: null,
   updateTimer: 0,
-  updateTimerThreshold: 1 / 1,
+  updateTimerThreshold: 1 / 20,
   fpsCounter: 0,
   fpsTimer: 0,
   lastFps: 0,
   run: function () {
-    const delta = performance.now() - (this.lastUpdate ?? performance.now());
-    this.lastUpdate = this.lastUpdate ?? performance.now();
-    this.fpsTimer += delta;
-    this.fpsCounter++;
+    const delta =
+      (performance.now() - (Game.lastUpdate ?? performance.now())) / 1000;
+    Game.lastUpdate = performance.now();
+    Game.updateTimer += delta;
+    Game.fpsTimer += delta;
+    Game.fpsCounter++;
 
-    if (this.fpsTimer > 1000 / 4) {
-      this.lastFps = this.fpsCounter * 4;
-      this.fpsTimer -= 1000 / 4;
-      this.fpsCounter = 0;
+    // FPS rendering
+    if (Game.fpsTimer > 1 / 8) {
+      Game.lastFps = Game.fpsCounter * 8;
+      Game.fpsTimer -= 1 / 8;
+      Game.fpsCounter = 0;
+    }
+
+    // Game update
+    if (Game.updateTimer > Game.updateTimerThreshold) {
+      Game.updateTimer -= Game.updateTimerThreshold;
+      Game.updateCallbacks.forEach((c) => c(delta));
     }
 
     Renderer.render(delta);
 
-    window.requestAnimationFrame(Game.run.bind(Game));
+    window.requestAnimationFrame(Game.run);
   },
   propagate: () => {
     /** Array of x_y to avoid duplicates */
     const processed: IPoint[] = [];
 
     for (const entity of [...Game.entities]) {
-      console.group("Tile", entity.coords);
-      console.log("TileDetails", entity);
-
       if (Game.isProcessed(entity.coords)) {
-        console.log("Shitty performant");
-        console.groupEnd();
         continue;
       }
 
@@ -100,10 +115,8 @@ const Game: IGlobalGameObject = {
 
       // Loop through neighbours and get their neighbours
       for (const neighbour of neighbours) {
-        console.group("Neighbour: ", neighbour);
         // Check if that neighbour has already been processed
         if (processed.find((v) => PointFunctions.compare(v, neighbour))) {
-          console.groupEnd();
           continue;
         }
 
@@ -137,7 +150,6 @@ const Game: IGlobalGameObject = {
 
         // Remove neighbours to attempt different types and complete the area
         if (!filteredContraints.length) {
-          console.log("No contraints available delete neighbours");
           subNeighbours.forEach((v) => Game.deleteEntity(v));
           continue;
         }
@@ -156,25 +168,35 @@ const Game: IGlobalGameObject = {
           (v) => (threshold += v.normalizedValue) && threshold > randomNumber
         );
 
-        console.log("SelectedContraint: ", selectedContraint);
-        console.log("RandomNumber: ", randomNumber);
-        console.log("Threshold: ", threshold);
-
         Game.createEntity(neighbour, selectedContraint?.type);
 
         // Add to processed neighbours
         processed.push(neighbour);
-
-        console.groupEnd();
       }
 
       Game.processed.push(entity.coords);
-
-      console.groupEnd();
     }
 
-    console.log("Propagating");
+    return Game.processed.length != Game.entities.length;
   },
+  autoPropagationEnabled: false,
+  autoPropagate: (_) => {
+    if (!Game.autoPropagationEnabled) {
+      return;
+    }
+
+    if (!Game.propagate()) {
+      Game.stopAutoPropagation();
+    }
+  },
+  startAutoPropagation: () =>
+    !void console.log("Auto propagation started") &&
+    (Game.autoPropagationEnabled = true),
+  stopAutoPropagation: () =>
+    !void console.log("Auto propagation stopped") &&
+    (Game.autoPropagationEnabled = false),
+
+  currentPaintingTileType: null,
 };
 
 const Renderer: IGlobalRendererObject = {
@@ -305,10 +327,8 @@ document.addEventListener("DOMContentLoaded", () => {
       Renderer.toLocalPoint(new Point(evt.clientX, evt.clientY))
     );
 
-    // debugger;
-
     if (evt.buttons == 1) {
-      Game.createEntity(localPoint);
+      Game.createEntity(localPoint, Game.currentPaintingTileType ?? "forest");
     } else if (evt.buttons == 2) {
       Game.deleteEntity(localPoint);
     }
@@ -316,12 +336,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Event listeners
   Renderer.canvas.addEventListener("mousedown", handleMouseEvent);
-  // Renderer.canvas.addEventListener("mousemove", handleMouseEvent);
+  Renderer.canvas.addEventListener("mousemove", handleMouseEvent);
+  Renderer.canvas.addEventListener(
+    "mouseup",
+    () => (Game.currentPaintingTileType = null)
+  );
   document.addEventListener("contextmenu", (evt) => evt.preventDefault());
 
   document.querySelector(".action-propagate")?.addEventListener("click", () => {
     Game.propagate();
   });
+
+  document
+    .querySelector(".action-propagate-auto")
+    ?.addEventListener("click", () => {
+      Game.startAutoPropagation();
+    });
+
   document
     .querySelector(".action-field-define-random")
     ?.addEventListener("click", () => {
@@ -337,6 +368,52 @@ document.addEventListener("DOMContentLoaded", () => {
     ?.addEventListener("click", () => {
       Game.clearEntities();
     });
+
+  // Add selection buttons for available field types
+  const wel_manipulation_actions = document.querySelector(
+    ".actions-field-manipulation"
+  );
+
+  const els_paintButtons: HTMLButtonElement[] = [];
+
+  for (const config of TileTypeConfigs) {
+    const el_button = document.createElement("button");
+    el_button.textContent =
+      config.type.charAt(0).toUpperCase() + config.type.substring(1);
+    el_button.setAttribute("type", "button");
+    el_button.setAttribute("data-tiletype", config.type);
+    el_button.style.setProperty("--bs-btn-bg", config.backgroundColor);
+    el_button.style.setProperty("--bs-btn-color", config.frontgroundColor);
+    el_button.style.setProperty(
+      "--bs-btn-hover-bg",
+      "rgba(from var(--bs-btn-bg) r g b / 0.25)"
+    );
+    // el_button.style.setProperty(
+    //   "--bs-btn-hover-border-color",
+    //   config.backgroundColor
+    // );
+    el_button.classList.add(
+      "action",
+      "action-set-painttype",
+      "px-4",
+      "btn",
+      "btn-sm"
+    );
+
+    el_button.addEventListener("click", () => {
+      Game.currentPaintingTileType = config.type;
+
+      for (const button of els_paintButtons) {
+        Game.currentPaintingTileType == button.dataset["tiletype"]
+          ? button.classList.add("active-paint")
+          : button.classList.remove("active-paint");
+      }
+    });
+
+    els_paintButtons.push(el_button);
+
+    wel_manipulation_actions?.appendChild(el_button);
+  }
 
   // Scrolling
   Renderer.canvas.addEventListener("wheel", (evt) => {

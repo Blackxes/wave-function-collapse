@@ -3,7 +3,13 @@
  * @Email blackxes.dev@gmail.com
  */
 
-import { IRenderModel, IWorld, TileType, TileTypeContrain } from "./types";
+import {
+  IRenderModel,
+  IWorld,
+  TileType,
+  TileTypeConfig,
+  TileTypeContrain,
+} from "./types";
 import { Point } from "./utils";
 
 export const BaseRenderModel: IRenderModel = {
@@ -20,21 +26,48 @@ export const WorldConfig: IWorld = {
 
 export const TileTypes = ["grass", "forest", "water", "sand"] as const;
 
+export const TileTypeConfigs: TileTypeConfig[] = [
+  {
+    type: "forest",
+    backgroundColor: "green",
+    frontgroundColor: "white",
+  },
+  {
+    type: "grass",
+    backgroundColor: "lime",
+    frontgroundColor: "black",
+  },
+  {
+    type: "sand",
+    backgroundColor: "yellow",
+    frontgroundColor: "black",
+  },
+  {
+    type: "water",
+    backgroundColor: "blue",
+    frontgroundColor: "white",
+  },
+];
+
 export const FieldContraints = {
   grass: [
     {
       type: "grass",
-      probability: 2,
+      probability: 10,
     },
     {
       type: "forest",
-      probability: 0.5,
+      probability: 1,
+    },
+    {
+      type: "sand",
+      probability: 0.25,
     },
   ],
   forest: [
     {
       type: "forest",
-      probability: 1,
+      probability: 2,
     },
     {
       type: "grass",
@@ -43,18 +76,26 @@ export const FieldContraints = {
   ],
   sand: [
     {
+      type: "sand",
+      probability: 5,
+    },
+    {
       type: "grass",
+      probability: 0.25,
+    },
+    {
+      type: "water",
       probability: 1,
     },
   ],
   water: [
     {
       type: "water",
-      probability: 3,
+      probability: 5,
     },
     {
       type: "sand",
-      probability: 1,
+      probability: 0.25,
     },
   ],
 } satisfies Record<TileType, TileTypeContrain[]>;
