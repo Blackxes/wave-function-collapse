@@ -3,22 +3,51 @@
  * @Email blackxes.dev@gmail.com
  */
 
-import { IRenderModel, IWorld, TileType, TileTypeContrain } from "./types";
+import {
+  IRenderModel,
+  IWorld,
+  TileType,
+  TileTypeConfig,
+  TileTypeContrain,
+} from "./types";
 import { Point } from "./utils";
 
 export const BaseRenderModel: IRenderModel = {
-  size: new Point(50, 50),
+  size: new Point(10, 10),
   imagePath: "./images/tower.webp",
   backgroundColor: "#ff8000",
 };
 
 export const WorldConfig: IWorld = {
-  tilesCount: { x: 10, y: 10 },
+  tilesCount: { x: 50, y: 50 },
   size: { x: 500, y: 500 },
   zoom: 1,
 };
 
 export const TileTypes = ["grass", "forest", "water", "sand"] as const;
+
+export const TileTypeConfigs: TileTypeConfig[] = [
+  {
+    type: "forest",
+    backgroundColor: "green",
+    frontgroundColor: "white",
+  },
+  {
+    type: "grass",
+    backgroundColor: "lime",
+    frontgroundColor: "black",
+  },
+  {
+    type: "sand",
+    backgroundColor: "yellow",
+    frontgroundColor: "black",
+  },
+  {
+    type: "water",
+    backgroundColor: "blue",
+    frontgroundColor: "white",
+  },
+];
 
 export const FieldContraints = {
   grass: [

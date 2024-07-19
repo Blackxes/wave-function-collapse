@@ -29,6 +29,7 @@ export interface IGlobalGameObject {
   autoPropagate: (delta: number) => void;
   startAutoPropagation: () => void;
   stopAutoPropagation: () => void;
+  currentPaintingTileType: null | TileType;
 }
 
 export interface IGlobalRendererObject {
@@ -56,6 +57,12 @@ export interface IRenderModel {
 }
 
 export type TileType = (typeof TileTypes)[number];
+
+export interface TileTypeConfig {
+  type: TileType;
+  backgroundColor: string;
+  frontgroundColor: string;
+}
 
 export interface TileTypeContrain {
   type: TileType;

@@ -19,3 +19,4 @@ body { min-height: 100vh; }
 .action-field-clear { border-color: grey;
   &:hover { border-color: inherit; background-color: lightgrey; }
 }
+.action-set-painttype.active-paint { padding-top: 20px; }

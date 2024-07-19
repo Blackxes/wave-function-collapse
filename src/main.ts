@@ -2,6 +2,7 @@ import "./app.css";
 import {
   BaseRenderModel,
   FieldContraints,
+  TileTypeConfigs,
   TileTypes,
   WorldConfig,
 } from "./data";
@@ -71,7 +72,7 @@ const Game: IGlobalGameObject = {
   },
   lastUpdate: null,
   updateTimer: 0,
-  updateTimerThreshold: 1 / 10,
+  updateTimerThreshold: 1 / 20,
   fpsCounter: 0,
   fpsTimer: 0,
   lastFps: 0,
@@ -194,6 +195,8 @@ const Game: IGlobalGameObject = {
   stopAutoPropagation: () =>
     !void console.log("Auto propagation stopped") &&
     (Game.autoPropagationEnabled = false),
+
+  currentPaintingTileType: null,
 };
 
 const Renderer: IGlobalRendererObject = {
@@ -324,10 +327,8 @@ document.addEventListener("DOMContentLoaded", () => {
       Renderer.toLocalPoint(new Point(evt.clientX, evt.clientY))
     );
 
-    // debugger;
-
     if (evt.buttons == 1) {
-      Game.createEntity(localPoint);
+      Game.createEntity(localPoint, Game.currentPaintingTileType ?? "forest");
     } else if (evt.buttons == 2) {
       Game.deleteEntity(localPoint);
     }
@@ -335,7 +336,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Event listeners
   Renderer.canvas.addEventListener("mousedown", handleMouseEvent);
-  // Renderer.canvas.addEventListener("mousemove", handleMouseEvent);
+  Renderer.canvas.addEventListener("mousemove", handleMouseEvent);
+  Renderer.canvas.addEventListener(
+    "mouseup",
+    () => (Game.currentPaintingTileType = null)
+  );
   document.addEventListener("contextmenu", (evt) => evt.preventDefault());
 
   document.querySelector(".action-propagate")?.addEventListener("click", () => {
@@ -363,6 +368,52 @@ document.addEventListener("DOMContentLoaded", () => {
     ?.addEventListener("click", () => {
       Game.clearEntities();
     });
+
+  // Add selection buttons for available field types
+  const wel_manipulation_actions = document.querySelector(
+    ".actions-field-manipulation"
+  );
+
+  const els_paintButtons: HTMLButtonElement[] = [];
+
+  for (const config of TileTypeConfigs) {
+    const el_button = document.createElement("button");
+    el_button.textContent =
+      config.type.charAt(0).toUpperCase() + config.type.substring(1);
+    el_button.setAttribute("type", "button");
+    el_button.setAttribute("data-tiletype", config.type);
+    el_button.style.setProperty("--bs-btn-bg", config.backgroundColor);
+    el_button.style.setProperty("--bs-btn-color", config.frontgroundColor);
+    el_button.style.setProperty(
+      "--bs-btn-hover-bg",
+      "rgba(from var(--bs-btn-bg) r g b / 0.25)"
+    );
+    // el_button.style.setProperty(
+    //   "--bs-btn-hover-border-color",
+    //   config.backgroundColor
+    // );
+    el_button.classList.add(
+      "action",
+      "action-set-painttype",
+      "px-4",
+      "btn",
+      "btn-sm"
+    );
+
+    el_button.addEventListener("click", () => {
+      Game.currentPaintingTileType = config.type;
+
+      for (const button of els_paintButtons) {
+        Game.currentPaintingTileType == button.dataset["tiletype"]
+          ? button.classList.add("active-paint")
+          : button.classList.remove("active-paint");
+      }
+    });
+
+    els_paintButtons.push(el_button);
+
+    wel_manipulation_actions?.appendChild(el_button);
+  }
 
   // Scrolling
   Renderer.canvas.addEventListener("wheel", (evt) => {
