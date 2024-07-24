@@ -1,22 +1,5 @@
 * { margin: 0; box-sizing: border-box; }
-body { min-height: 100vh; }
-#app { min-height: inherit; display: flex; flex-direction: column; }
-.game-wrapper { 
-  background-color: palegoldenrod;
-  &.detatched { display: grid; place-items: center; }
-}
-.game-canvas { display: block; background: #fff; }
-
-.action-propagate { background-color: hotpink;
-  &:hover { border-color: hotpink; }
-}
-.action-propagate-auto { background-color: #b51a67; color: white;
-  &:hover { border-color: #b51a67; }
-}
-.action-field-define-random { background-color: #FFC107;
-  &:hover { border-color: #FFC107; }
-}
-.action-field-clear { border-color: grey;
-  &:hover { border-color: inherit; background-color: lightgrey; }
-}
-.action-set-painttype.active-paint { padding-top: 20px; }
+body { width: 100%; min-height: 100vh; background-color: white; }
+#app { min-height: inherit; display: grid; place-items: center;  }
+canvas { border: 1px solid red; }
+/* #app { min-height: inherit; display: flex; flex-direction: column; } */
