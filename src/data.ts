@@ -13,14 +13,14 @@ import {
 import { Point } from "./utils";
 
 export const BaseRenderModel: IRenderModel = {
-  size: new Point(10, 10),
+  size: new Point(5, 5),
   imagePath: "./images/tower.webp",
   backgroundColor: "#ff8000",
 };
 
 export const WorldConfig: IWorld = {
-  tilesCount: { x: 50, y: 50 },
-  size: { x: 500, y: 500 },
+  tilesCount: { x: 200, y: 200 },
+  size: { x: 1000, y: 1000 },
   zoom: 1,
 };
 
@@ -81,7 +81,7 @@ export const FieldContraints = {
     },
     {
       type: "grass",
-      probability: 0.25,
+      probability: 2,
     },
     {
       type: "water",
@@ -91,7 +91,7 @@ export const FieldContraints = {
   water: [
     {
       type: "water",
-      probability: 5,
+      probability: 15,
     },
     {
       type: "sand",

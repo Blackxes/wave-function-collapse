@@ -44,10 +44,10 @@ const Game: IGlobalGameObject = {
   },
   deleteEntity: (coords) => {
     const entityIndex = Game.entities.findIndex((v) =>
-      PointFunctions.compare(v.coords, coords)
+      PointFunctions.compare(v.coords, coords),
     );
     const processedIndex = Game.processed.findIndex((v) =>
-      PointFunctions.compare(v, coords)
+      PointFunctions.compare(v, coords),
     );
 
     return (
@@ -142,7 +142,7 @@ const Game: IGlobalGameObject = {
           .flat()
           .filter(
             (t, _, a) =>
-              a.filter((v) => v.type == t.type).length == rawContraints.length
+              a.filter((v) => v.type == t.type).length == rawContraints.length,
           )
           .filter((v, i, a) => a.indexOf(v) == i);
 
@@ -156,7 +156,7 @@ const Game: IGlobalGameObject = {
 
         // Pick a random contraint from probability normalized contraints
         const normalized = Object.values(
-          getNormalized(filteredContraints, "probability")
+          getNormalized(filteredContraints, "probability"),
         ).sort((a, b) => b.normalizedValue - a.normalizedValue);
 
         // debugger;
@@ -165,7 +165,7 @@ const Game: IGlobalGameObject = {
         let threshold = 0;
         // Commulate probabilities until the randomNumber is lower which selects the tile type
         const selectedContraint = normalized.find(
-          (v) => (threshold += v.normalizedValue) && threshold > randomNumber
+          (v) => (threshold += v.normalizedValue) && threshold > randomNumber,
         );
 
         Game.createEntity(neighbour, selectedContraint?.type);
@@ -189,12 +189,8 @@ const Game: IGlobalGameObject = {
       Game.stopAutoPropagation();
     }
   },
-  startAutoPropagation: () =>
-    !void console.log("Auto propagation started") &&
-    (Game.autoPropagationEnabled = true),
-  stopAutoPropagation: () =>
-    !void console.log("Auto propagation stopped") &&
-    (Game.autoPropagationEnabled = false),
+  startAutoPropagation: () => (Game.autoPropagationEnabled = true),
+  stopAutoPropagation: () => (Game.autoPropagationEnabled = false),
 
   currentPaintingTileType: null,
 };
@@ -283,7 +279,7 @@ const Renderer: IGlobalRendererObject = {
         unit.position.x,
         unit.position.y,
         unit.model.size.x,
-        unit.model.size.y
+        unit.model.size.y,
       );
     }
 
@@ -308,7 +304,8 @@ document.addEventListener("DOMContentLoaded", () => {
   Renderer.mountCanvas();
 
   if (!Renderer.canvas || !Renderer.context) {
-    return !void console.log("Initialization failed.") && false;
+    console.log("Initialization failed.");
+    return false;
   }
 
   // Initiate random tile
@@ -324,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handles mouse input // Creates/Removes tiles
   const handleMouseEvent = (evt: MouseEvent) => {
     const localPoint = Renderer.toCoords(
-      Renderer.toLocalPoint(new Point(evt.clientX, evt.clientY))
+      Renderer.toLocalPoint(new Point(evt.clientX, evt.clientY)),
     );
 
     if (evt.buttons == 1) {
@@ -339,7 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
   Renderer.canvas.addEventListener("mousemove", handleMouseEvent);
   Renderer.canvas.addEventListener(
     "mouseup",
-    () => (Game.currentPaintingTileType = null)
+    () => (Game.currentPaintingTileType = null),
   );
   document.addEventListener("contextmenu", (evt) => evt.preventDefault());
 
@@ -358,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ?.addEventListener("click", () => {
       const point = new Point(
         getRandomFloored(WorldConfig.tilesCount.x),
-        getRandomFloored(WorldConfig.tilesCount.y)
+        getRandomFloored(WorldConfig.tilesCount.y),
       );
 
       Game.createEntity(point);
@@ -371,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add selection buttons for available field types
   const wel_manipulation_actions = document.querySelector(
-    ".actions-field-manipulation"
+    ".actions-field-manipulation",
   );
 
   const els_paintButtons: HTMLButtonElement[] = [];
@@ -386,7 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el_button.style.setProperty("--bs-btn-color", config.frontgroundColor);
     el_button.style.setProperty(
       "--bs-btn-hover-bg",
-      "rgba(from var(--bs-btn-bg) r g b / 0.25)"
+      "rgba(from var(--bs-btn-bg) r g b / 0.25)",
     );
     // el_button.style.setProperty(
     //   "--bs-btn-hover-border-color",
@@ -397,7 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "action-set-painttype",
       "px-4",
       "btn",
-      "btn-sm"
+      "btn-sm",
     );
 
     el_button.addEventListener("click", () => {
