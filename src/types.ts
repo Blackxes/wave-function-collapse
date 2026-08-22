@@ -6,14 +6,14 @@
 import { TileTypes } from "./data";
 import { IPoint } from "./utils/types";
 
-export interface IGlobalGameObject {
+export interface GlobalGameObject {
   initialized: boolean;
   initialize: () => boolean;
-  entities: IWorldObject[];
+  entities: WorldObject[];
   processed: IPoint[];
   createEntity: (position: IPoint, type?: TileType) => void;
   deleteEntity: (position: IPoint) => void;
-  getEntity: (coords: IPoint) => IWorldObject | undefined;
+  getEntity: (coords: IPoint) => WorldObject | undefined;
   isProcessed: (coords: IPoint) => boolean;
   clearEntities: () => void;
   lastUpdate: null | number;
@@ -32,7 +32,7 @@ export interface IGlobalGameObject {
   currentPaintingTileType: null | TileType;
 }
 
-export interface IGlobalRendererObject {
+export interface GlobalRendererObject {
   initialized: boolean;
   canvas: HTMLCanvasElement | null;
   context: CanvasRenderingContext2D | null;
@@ -76,7 +76,7 @@ export interface TileNeighbours {
   left: IPoint | null;
 }
 
-export interface IWorldObject {
+export interface WorldObject {
   coords: IPoint;
   position: IPoint;
   type: TileType;
@@ -85,7 +85,7 @@ export interface IWorldObject {
   mounted: boolean;
 }
 
-export interface IWorld {
+export interface World {
   tilesCount: IPoint;
   size: IPoint;
   zoom: number;

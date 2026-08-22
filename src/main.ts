@@ -8,14 +8,14 @@ import {
 } from "./data";
 import { getNeighbours, getNormalized, getRandomFloored } from "./functions";
 import {
-  IWorldObject as IEntity,
-  IGlobalGameObject,
-  IGlobalRendererObject,
+  GlobalGameObject,
+  GlobalRendererObject,
+  WorldObject as IEntity,
   TileTypeContrain,
 } from "./types";
 import { IPoint, Point, PointFunctions } from "./utils";
 
-const Game: IGlobalGameObject = {
+const Game: GlobalGameObject = {
   initialized: false,
   initialize: () => {
     Game.updateCallbacks.push(Game.autoPropagate);
@@ -204,7 +204,7 @@ const Game: IGlobalGameObject = {
   currentPaintingTileType: null,
 };
 
-const Renderer: IGlobalRendererObject = {
+const Renderer: GlobalRendererObject = {
   canvas: null,
   context: null,
   contextWrapper: null,

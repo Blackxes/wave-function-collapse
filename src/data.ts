@@ -5,10 +5,10 @@
 
 import {
   IRenderModel,
-  IWorld,
   TileType,
   TileTypeConfig,
   TileTypeContrain,
+  World,
 } from "./types";
 import { Point } from "./utils";
 
@@ -18,9 +18,9 @@ export const BaseRenderModel: IRenderModel = {
   backgroundColor: "#ff8000",
 };
 
-export const WorldConfig: IWorld = {
-  tilesCount: { x: 200, y: 200 },
-  size: { x: 1000, y: 1000 },
+export const WorldConfig: World = {
+  tilesCount: { x: 50, y: 50 },
+  size: { x: 0, y: 0 },
   zoom: 1,
 };
 
