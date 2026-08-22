@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          node-version: 20
+          node-version: 25
       - run: |
           npm i
           npm run build
