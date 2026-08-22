@@ -27,7 +27,6 @@ const Game: IGlobalGameObject = {
   updateCallbacks: [],
   createEntity: (coords, type) => {
     if (Game.getEntity(coords)) {
-      console.log("Entity already defined");
       return false;
     }
 
@@ -102,6 +101,9 @@ const Game: IGlobalGameObject = {
     window.requestAnimationFrame(Game.run);
   },
   propagate: () => {
+    const timings = [];
+    timings.push({ description: "start", time: performance.now() });
+
     /** Array of x_y to avoid duplicates */
     const processed: IPoint[] = [];
 
@@ -134,8 +136,6 @@ const Game: IGlobalGameObject = {
           rawContraints.push(FieldContraints[e.type]);
         }
 
-        // debugger;
-
         // Filter out invalid contraints
         // Count the number of times the contrer out the ones less than neighbour count
         const filteredContraints = rawContraints
@@ -145,9 +145,6 @@ const Game: IGlobalGameObject = {
               a.filter((v) => v.type == t.type).length == rawContraints.length,
           )
           .filter((v, i, a) => a.indexOf(v) == i);
-
-        // debugger;
-
         // Remove neighbours to attempt different types and complete the area
         if (!filteredContraints.length) {
           subNeighbours.forEach((v) => Game.deleteEntity(v));
@@ -158,8 +155,6 @@ const Game: IGlobalGameObject = {
         const normalized = Object.values(
           getNormalized(filteredContraints, "probability"),
         ).sort((a, b) => b.normalizedValue - a.normalizedValue);
-
-        // debugger;
 
         let randomNumber = Math.random();
         let threshold = 0;
@@ -177,6 +172,17 @@ const Game: IGlobalGameObject = {
       Game.processed.push(entity.coords);
     }
 
+    timings.push({ description: "end", time: performance.now() });
+
+    timings.push({
+      description: "whole",
+      time:
+        timings.find((v) => v.description == "end")!.time -
+        timings.find((v) => v.description == "start")!.time,
+    });
+
+    console.log(timings.at(-1)?.time);
+
     return Game.processed.length != Game.entities.length;
   },
   autoPropagationEnabled: false,
@@ -189,9 +195,12 @@ const Game: IGlobalGameObject = {
       Game.stopAutoPropagation();
     }
   },
-  startAutoPropagation: () => (Game.autoPropagationEnabled = true),
-  stopAutoPropagation: () => (Game.autoPropagationEnabled = false),
-
+  startAutoPropagation: () => {
+    Game.autoPropagationEnabled = true;
+  },
+  stopAutoPropagation: () => {
+    Game.autoPropagationEnabled = false;
+  },
   currentPaintingTileType: null,
 };
 
@@ -204,10 +213,12 @@ const Renderer: IGlobalRendererObject = {
     Renderer.canvas = document.createElement("canvas");
     Renderer.context = Renderer.canvas.getContext("2d");
 
-    if (!Renderer.canvas) return false;
+    if (!Renderer.canvas) {
+      return false;
+    }
 
-    Renderer.canvas.width = WorldConfig.size.x;
-    Renderer.canvas.height = WorldConfig.size.y;
+    Renderer.canvas.width = WorldConfig.tilesCount.x * BaseRenderModel.size.x;
+    Renderer.canvas.height = WorldConfig.tilesCount.y * BaseRenderModel.size.y;
     Renderer.contextWrapper = document.querySelector(".game-wrapper");
 
     if (
@@ -223,13 +234,17 @@ const Renderer: IGlobalRendererObject = {
     return (Renderer.initialized = true);
   },
   updateWindow: () => {
-    if (!Renderer.canvas) return false;
+    if (!Renderer.canvas) {
+      return false;
+    }
 
     // Renderer.canvas.width = window.innerWidth;
     // Renderer.canvas.height = window.innerHeight;
   },
   mountCanvas: () => {
-    if (!Renderer.contextWrapper || !Renderer.canvas) return false;
+    if (!Renderer.contextWrapper || !Renderer.canvas) {
+      return false;
+    }
 
     Renderer.contextWrapper.append(Renderer.canvas);
   },
@@ -334,10 +349,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Event listeners
   Renderer.canvas.addEventListener("mousedown", handleMouseEvent);
   Renderer.canvas.addEventListener("mousemove", handleMouseEvent);
-  Renderer.canvas.addEventListener(
-    "mouseup",
-    () => (Game.currentPaintingTileType = null),
-  );
   document.addEventListener("contextmenu", (evt) => evt.preventDefault());
 
   document.querySelector(".action-propagate")?.addEventListener("click", () => {
